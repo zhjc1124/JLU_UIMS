@@ -39,15 +39,22 @@ class UIMS(object):
         r = s.post('http://uims.jlu.edu.cn/ntms/action/getCurrentUserInfo.do')
         user_info = json.loads(r.text)
         post_data = {
-            "tag": "teachClassStud@schedule",
-            "branch": "default",
+            "tag": "search@teachingTerm",
+            "branch": "byId",
             "params": {
-                "termId": user_info['defRes']['term_l'],
-                "studId": user_info['userId']}
+                "termId": user_info['defRes']['term_l']
+            }
         }
-        headers = {'Content-Type': 'application/json;charset=UTF-8'}
+        headers = {'Content-Type': 'application/json'}
         r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', json.dumps(post_data), headers=headers)
-        return json.loads(r.text)['value']
+        start_date = json.loads(r.text)['value'][0]['startDate'].split('T')[0]
+
+        post_data["params"]["studId"] = user_info['userId']
+        post_data["branch"] = "default"
+        post_data["tag"] = "teachClassStud@schedule"
+        r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', json.dumps(post_data), headers=headers)
+        print(json.loads(r.text))
+        return start_date, json.loads(r.text)['value']
 
 
 if __name__ == '__main__':
