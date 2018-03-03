@@ -47,6 +47,7 @@ class UIMS(object):
         }
         headers = {'Content-Type': 'application/json;charset=UTF-8'}
         r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', json.dumps(post_data), headers=headers)
+        return json.loads(r.text)['value']
 
 
 if __name__ == '__main__':
