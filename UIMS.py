@@ -67,6 +67,6 @@ class UIMS(object):
 
 if __name__ == '__main__':
     # user, pwd = input().split(',')
-    user, pwd = '52151126', '11171x'
+    user, pwd = 'username', 'password'
     print(UIMS(user, pwd).get_course())
 
