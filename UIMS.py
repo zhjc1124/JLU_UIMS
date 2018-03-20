@@ -1,6 +1,7 @@
 from hashlib import md5
 import requests
 import json
+import re
 
 
 def transfer(username, password):
@@ -9,7 +10,7 @@ def transfer(username, password):
     if len(password) < 4 or username == password or password == '000000':
         pass
     else:
-        if any(map(lambda x:x.isdigit(), password)):
+        if any(map(lambda x: x.isdigit(), password)):
             pwd_strenth += 1
         if any(map(lambda x:x.isalpha(), password)):
             pwd_strenth += 1
@@ -41,7 +42,10 @@ class UIMS(object):
             'j_password': j_password,
             'mousePath': pwd_strength
         }
-        s.post('http://uims.jlu.edu.cn/ntms/j_spring_security_check', data=post_data)
+        r = s.post('http://uims.jlu.edu.cn/ntms/j_spring_security_check', data=post_data)
+        message = re.findall('<span class="error_message" id="error_message">(.*?)</span>', r.text)
+        if message:
+            raise ValueError(message[0])
 
     def get_course(self):
         s = self.session
@@ -66,7 +70,7 @@ class UIMS(object):
 
 
 if __name__ == '__main__':
-    # user, pwd = input().split(',')
-    user, pwd = 'username', 'password'
+    user, pwd = input().split(',')
+    # user, pwd = 'username', 'password'
     print(UIMS(user, pwd).get_course())
 
