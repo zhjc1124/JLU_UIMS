@@ -33,7 +33,7 @@ class UIMS(object):
         cookies = {
             'loginPage': 'userLogin.jsp',
             'alu': username,
-            'pwdStrength': '2',
+            'pwdStrength': str(pwd_strength),
         }
         requests.utils.add_dict_to_cookiejar(s.cookies, cookies)
 
@@ -47,7 +47,7 @@ class UIMS(object):
         if message:
             raise ValueError(message[0])
 
-    def get_course(self):
+    def get_course(self, save_file=None):
         s = self.session
         r = s.post('http://uims.jlu.edu.cn/ntms/action/getCurrentUserInfo.do')
         user_info = json.loads(r.text)
@@ -66,11 +66,14 @@ class UIMS(object):
         post_data["branch"] = "default"
         post_data["tag"] = "teachClassStud@schedule"
         r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', json.dumps(post_data), headers=headers)
+        if save_file:
+            with open(save_file, 'w') as f:
+                json.dump([start_date, json.loads(r.text)['value']], f)
         return start_date, json.loads(r.text)['value']
 
 
 if __name__ == '__main__':
-    user, pwd = input().split(',')
-    # user, pwd = 'username', 'password'
-    print(UIMS(user, pwd).get_course())
+    # user, pwd = input().split(',')
+    user, pwd = 'username', 'password'
+    print(UIMS(user, pwd).get_course(save_file='courses.json'))
 
