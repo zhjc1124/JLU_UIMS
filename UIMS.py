@@ -40,7 +40,7 @@ class UIMS(object):
         post_data = {
             'j_username': username,
             'j_password': j_password,
-            'mousePath': pwd_strength
+            'mousePath': 'TFwABSAAAtRAQBFRAwBNRBQBVRCABdRDABlREABtQFgB1QHAB9PJQCFOLQCNONQCVNPQCdNRgClNUACtNWQC1NYgC9NaQDFOcADNQdgDVQegDdSfwDlUggDtVhQD1VhwD9WiQEFWigENWiwEdWjAElWjQE1WjgFFWkAFNWkgFUWlAFdWlwFkWmgFtWngF1WogF9WpgGFWqgGNWrgGVWtAGdWugGlWwAGtVxgG1VzgG9U1gHFU3gHNU5QHVT7AHdXDAEp'
         }
         r = s.post('http://uims.jlu.edu.cn/ntms/j_spring_security_check', data=post_data)
         message = re.findall('<span class="error_message" id="error_message">(.*?)</span>', r.text)
