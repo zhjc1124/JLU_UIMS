@@ -40,12 +40,14 @@ class UIMS(object):
         post_data = {
             'j_username': username,
             'j_password': j_password,
-            'mousePath': pwd_strength
+            'mousePath': 'QDgABPAQBWPAgBfQDQBvRGgB+UKwCQUOwCiUSQCyUVQDDVYwDUVbQDkVeAD1VgQEGWhgEWWjQEnWmgE2WpAFIWsQFZWugFpWxQF6W0AGKW2QGbW4gGsW6QG8HGACd'
         }
         r = s.post('http://uims.jlu.edu.cn/ntms/j_spring_security_check', data=post_data)
         message = re.findall('<span class="error_message" id="error_message">(.*?)</span>', r.text)
         if message:
             raise ValueError(message[0])
+        else:
+            print('登陆成功')
 
     def get_course(self):
         s = self.session
@@ -68,9 +70,43 @@ class UIMS(object):
         r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', json.dumps(post_data), headers=headers)
         return start_date, json.loads(r.text)['value']
 
+    def auto_evaluate(self):
+        s = self.session
+        post_data = {
+            "tag": "student@evalItem",
+            "branch": "self",
+            "params": {
+                "blank": "Y"
+            }
+        }
+        headers = {'Content-Type': 'application/json'}
+        r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', data=json.dumps(post_data), headers=headers)
+        eval_info = json.loads(r.text)['value']
+        for course in eval_info:
+            # url = course['evalActTime']['evalGuideline']['paperUrl']
+            id = course['evalItemId']
+            post_url = 'http://uims.jlu.edu.cn/ntms/action/eval/eval-with-answer.do'
+            post_data = {"guidelineId": 120, "evalItemId": "%s" % id,
+                         "answers": {"prob11": "A", "prob12": "A", "prob13": "N", "prob14": "A",
+                                     "prob15": "A", "prob21": "A", "prob22": "A", "prob23": "A", "prob31": "A",
+                                     "prob32": "A", "prob33": "A", "prob41": "A", "prob42": "A", "prob43": "A",
+                                     "prob51": "A", "prob52": "A", "sat6": "A", "mulsel71": "K", "advice72": "无",
+                                     "prob73": "Y"},
+                         "clicks": {"_boot_": 0, "prob11": 49050, "prob12": 50509,
+                                    "prob13": 52769, "prob14": 54833, "prob15": 58783,
+                                    "prob21": 61488, "prob22": 62599,
+                                    "prob23": 64182, "prob31": 68422, "prob32": 70505,
+                                    "prob33": 71589, "prob41": 73270,
+                                    "prob42": 76550, "prob43": 79323, "prob51": 90550,
+                                    "prob52": 94748, "sat6": 96238,
+                                    "mulsel71": 101482, "prob73": 103695}}
+            s.post(post_url, data=json.dumps(post_data), headers=headers)
+        print('评价完成')
+
 
 if __name__ == '__main__':
     user, pwd = input().split(',')
     # user, pwd = 'username', 'password'
-    print(UIMS(user, pwd).get_course())
+    u = UIMS(user, pwd)
+    u.auto_evaluate()
 
