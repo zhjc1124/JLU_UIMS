@@ -33,23 +33,21 @@ class UIMS(object):
         cookies = {
             'loginPage': 'userLogin.jsp',
             'alu': username,
-            'pwdStrength': '2',
+            'pwdStrength': str(pwd_strength),
         }
         requests.utils.add_dict_to_cookiejar(s.cookies, cookies)
 
         post_data = {
             'j_username': username,
             'j_password': j_password,
-            'mousePath': 'QDgABPAQBWPAgBfQDQBvRGgB+UKwCQUOwCiUSQCyUVQDDVYwDUVbQDkVeAD1VgQEGWhgEWWjQEnWmgE2WpAFIWsQFZWugFpWxQF6W0AGKW2QGbW4gGsW6QG8HGACd'
+            'mousePath': 'TFwABSAAAtRAQBFRAwBNRBQBVRCABdRDABlREABtQFgB1QHAB9PJQCFOLQCNONQCVNPQCdNRgClNUACtNWQC1NYgC9NaQDFOcADNQdgDVQegDdSfwDlUggDtVhQD1VhwD9WiQEFWigENWiwEdWjAElWjQE1WjgFFWkAFNWkgFUWlAFdWlwFkWmgFtWngF1WogF9WpgGFWqgGNWrgGVWtAGdWugGlWwAGtVxgG1VzgG9U1gHFU3gHNU5QHVT7AHdXDAEp'
         }
         r = s.post('http://uims.jlu.edu.cn/ntms/j_spring_security_check', data=post_data)
         message = re.findall('<span class="error_message" id="error_message">(.*?)</span>', r.text)
         if message:
             raise ValueError(message[0])
-        else:
-            print('登陆成功')
 
-    def get_course(self):
+    def get_course(self, save_file=None):
         s = self.session
         r = s.post('http://uims.jlu.edu.cn/ntms/action/getCurrentUserInfo.do')
         user_info = json.loads(r.text)
@@ -68,6 +66,9 @@ class UIMS(object):
         post_data["branch"] = "default"
         post_data["tag"] = "teachClassStud@schedule"
         r = s.post('http://uims.jlu.edu.cn/ntms/service/res.do', json.dumps(post_data), headers=headers)
+        if save_file:
+            with open(save_file, 'w') as f:
+                json.dump([start_date, json.loads(r.text)['value']], f)
         return start_date, json.loads(r.text)['value']
 
     def auto_evaluate(self):
